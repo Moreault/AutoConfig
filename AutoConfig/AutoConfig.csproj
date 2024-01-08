@@ -1,33 +1,33 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-	  <TargetFramework>net7.0</TargetFramework>
-	  <ImplicitUsings>enable</ImplicitUsings>
-	  <Nullable>enable</Nullable>
-	  <RootNamespace>ToolBX.AutoConfig</RootNamespace>
-	  <RepositoryUrl>https://github.com/Moreault/AutoInject</RepositoryUrl>
-	  <RepositoryType>git</RepositoryType>
-	  <Authors>Mathieu Moreault</Authors>
-	  <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-	  <Version>2.2.0-beta2</Version>
-	  <Description>A .NET library to make it easier to use appsettings sections using [AutoConfig] attributes directly on classes.</Description>
-	  <PackageId>ToolBX.$(AssemblyName)</PackageId>
-	  <PackageIcon>autoconfig.png</PackageIcon>
-	  <PackageProjectUrl>https://github.com/Moreault/AutoConfig</PackageProjectUrl>
-	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
-	  <PackageReadmeFile>README.md</PackageReadmeFile>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<RootNamespace>ToolBX.AutoConfig</RootNamespace>
+		<RepositoryUrl>https://github.com/Moreault/AutoInject</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<Authors>Mathieu Moreault</Authors>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<Version>2.2.0-beta2</Version>
+		<Description>A .NET library to make it easier to use appsettings sections using [AutoConfig] attributes directly on classes.</Description>
+		<PackageId>ToolBX.$(AssemblyName)</PackageId>
+		<PackageIcon>autoconfig.png</PackageIcon>
+		<PackageProjectUrl>https://github.com/Moreault/AutoConfig</PackageProjectUrl>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <None Include="..\autoconfig.png">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-    <None Include="..\README.md">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="..\autoconfig.png">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="..\README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
