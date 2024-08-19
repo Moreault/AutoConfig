@@ -19,6 +19,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Microsoft.Extensions.Options" Version="8.0.2" />
 		<PackageReference Include="ToolBX.AssemblyInitializer.Console" Version="2.2.0" />
 		<PackageReference Include="ToolBX.MisterTerminal" Version="2.2.0" />
 	</ItemGroup>
