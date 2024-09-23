@@ -39,5 +39,20 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    private static IServiceCollection Configure<T>(IServiceCollection services, IConfiguration configuration, string name) where T : class => services.Configure<T>(x => configuration.GetSection(name).Bind(x));
+    private static IServiceCollection Configure<T>(IServiceCollection services, IConfiguration configuration, string name) where T : class
+    {
+        var section = GetSection(configuration, name);
+        return services.Configure<T>(x => section.Bind(x));
+    }
+
+    private static IConfigurationSection GetSection(IConfiguration configuration, string path)
+    {
+        string[] parts = path.Split('.');
+        IConfigurationSection section = configuration.GetSection(parts[0]);
+        for (int i = 1; i < parts.Length; i++)
+        {
+            section = section.GetSection(parts[i]);
+        }
+        return section;
+    }
 }

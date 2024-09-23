@@ -1,10 +1,19 @@
-﻿ConsoleHost.UseStartup<Startup>();
+﻿var builder = new ConfigurationBuilder()
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json", optional: false);
 
-public class Startup : ConsoleStartup
+
+IConfiguration config = builder.Build();
+
+var services = new ServiceCollection();
+
+ToolBX.AutoConfig.ServiceCollectionExtensions.AddAutoConfig(services, config);
+services.AddAutoInjectServices();
+
+var provider = services.BuildServiceProvider();
+var app = new ConsoleAppBuilder
 {
-    public Startup(IConfiguration configuration) : base(configuration)
-    {
-    }
+    ApplicationServices = provider
+};
 
-    public override void Run(IServiceProvider serviceProvider) => serviceProvider.GetRequiredService<ISample>().Start();
-}
+provider.GetRequiredService<ISample>().Start();
