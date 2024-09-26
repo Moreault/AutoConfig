@@ -1,6 +1,6 @@
 ﻿namespace AutoConfig.Sample;
 
-[ToolBX.AutoConfig.AutoConfig("Group.SampleA")]
+[AutoConfig("Group.SampleA")]
 public sealed record SampleAOptions
 {
     public string Text { get; init; }

@@ -13,12 +13,12 @@ public class Sample : ISample
     private readonly SampleAOptions _optionsA;
     private readonly SampleBOptions _optionsB;
 
-    public Sample(ITerminal terminal, IOptions<SampleOptions> options, SampleAOptions optionsA, SampleBOptions optionsB)
+    public Sample(ITerminal terminal, IOptions<SampleOptions> options, IOptions<SampleAOptions> optionsA, IOptions<SampleBOptions> optionsB)
     {
         _terminal = terminal;
         _options = options.Value;
-        _optionsA = optionsA;
-        _optionsB = optionsB;
+        _optionsA = optionsA.Value;
+        _optionsB = optionsB.Value;
     }
 
     public void Start()

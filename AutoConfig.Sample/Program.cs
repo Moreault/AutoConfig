@@ -7,7 +7,7 @@ IConfiguration config = builder.Build();
 
 var services = new ServiceCollection();
 
-ToolBX.AutoConfig.ServiceCollectionExtensions.AddAutoConfig(services, config);
+services.AddAutoConfig(config);
 services.AddAutoInjectServices();
 
 var provider = services.BuildServiceProvider();
