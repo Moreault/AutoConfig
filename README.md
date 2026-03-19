@@ -46,3 +46,26 @@ services.AddAutoConfig(Assembly.GetExecutingAssembly(), configuration);
 ```
 
 The latter is more performant because the former will look through all your assemblies looking for anything with the `[AutoConfig]` attribute on it. It is more convenient but it comes at certain a cost. Use the `Assembly` overload if performance is a concern.
+
+## Validation
+
+AutoConfig supports optional validation via `System.ComponentModel.DataAnnotations`. Enable it by setting `ValidateDataAnnotations` and/or `ValidateOnStart` on the attribute:
+
+```cs
+using System.ComponentModel.DataAnnotations;
+
+[AutoConfig("MyConfig", ValidateDataAnnotations = true, ValidateOnStart = true)]
+public sealed record Configuration
+{
+    [Required]
+    public string Name { get; init; }
+
+    [Range(1, 100)]
+    public int MaxRetries { get; init; }
+}
+```
+
+- `ValidateDataAnnotations` — validates properties using data annotation attributes such as `[Required]`, `[Range]`, `[StringLength]`, etc.
+- `ValidateOnStart` — triggers validation when the application starts rather than on first access, causing the app to fail fast if configuration is invalid.
+
+Both default to `false`, so existing usage is unaffected.

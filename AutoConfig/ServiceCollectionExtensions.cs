@@ -33,16 +33,30 @@ public static class ServiceCollectionExtensions
         {
             var attribute = (AutoConfigAttribute)Attribute.GetCustomAttribute(type, typeof(AutoConfigAttribute), true)!;
             typeof(ServiceCollectionExtensions).GetMethod(nameof(Configure), BindingFlags.Static | BindingFlags.NonPublic)!.MakeGenericMethod(type)
-                .Invoke(null, BindingFlags.Static | BindingFlags.NonPublic, null, [services, configuration, attribute.Name], null);
+                .Invoke(null, BindingFlags.Static | BindingFlags.NonPublic, null, [services, configuration, attribute.Name, attribute.ValidateDataAnnotations, attribute.ValidateOnStart], null);
         }
 
         return services;
     }
 
-    private static IServiceCollection Configure<T>(IServiceCollection services, IConfiguration configuration, string name) where T : class
+    private static IServiceCollection Configure<T>(IServiceCollection services, IConfiguration configuration, string name, bool validateDataAnnotations, bool validateOnStart) where T : class
     {
         var section = GetSection(configuration, name);
-        return services.Configure<T>(x => section.Bind(x));
+
+        if (!validateDataAnnotations && !validateOnStart)
+        {
+            return services.Configure<T>(x => section.Bind(x));
+        }
+
+        var builder = services.AddOptions<T>().Bind(section);
+
+        if (validateDataAnnotations)
+            builder.ValidateDataAnnotations();
+
+        if (validateOnStart)
+            builder.ValidateOnStart();
+
+        return services;
     }
 
     private static IConfigurationSection GetSection(IConfiguration configuration, string path)
