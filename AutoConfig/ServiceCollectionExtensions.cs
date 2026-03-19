@@ -7,9 +7,9 @@ public static class ServiceCollectionExtensions
     /// </summary>
     public static IServiceCollection AddAutoConfig(this IServiceCollection services, Assembly assembly, IConfiguration configuration)
     {
-        if (services is null) throw new ArgumentNullException(nameof(services));
-        if (assembly is null) throw new ArgumentNullException(nameof(assembly));
-        if (configuration is null) throw new ArgumentNullException(nameof(configuration));
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(assembly);
+        ArgumentNullException.ThrowIfNull(configuration);
 
         var types = Types.From(assembly).Where(x => !x.IsInterface && !x.IsAbstract && !x.IsGenericTypeDefinition && !x.IsGenericType && x.HasAttribute<AutoConfigAttribute>());
         return services.AddAutoConfig(configuration, types);
@@ -20,8 +20,8 @@ public static class ServiceCollectionExtensions
     /// </summary>
     public static IServiceCollection AddAutoConfig(this IServiceCollection services, IConfiguration configuration)
     {
-        if (services is null) throw new ArgumentNullException(nameof(services));
-        if (configuration is null) throw new ArgumentNullException(nameof(configuration));
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(configuration);
 
         var types = Types.Where(x => !x.IsInterface && !x.IsAbstract && !x.IsGenericTypeDefinition && !x.IsGenericType && x.HasAttribute<AutoConfigAttribute>());
         return services.AddAutoConfig(configuration, types);
@@ -33,7 +33,7 @@ public static class ServiceCollectionExtensions
         {
             var attribute = (AutoConfigAttribute)Attribute.GetCustomAttribute(type, typeof(AutoConfigAttribute), true)!;
             typeof(ServiceCollectionExtensions).GetMethod(nameof(Configure), BindingFlags.Static | BindingFlags.NonPublic)!.MakeGenericMethod(type)
-                .Invoke(null, BindingFlags.Static | BindingFlags.NonPublic, null, new object[] { services, configuration, attribute.Name }, null);
+                .Invoke(null, BindingFlags.Static | BindingFlags.NonPublic, null, [services, configuration, attribute.Name], null);
         }
 
         return services;

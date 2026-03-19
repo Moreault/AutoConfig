@@ -1,12 +1,7 @@
-﻿namespace ToolBX.AutoConfig;
+namespace ToolBX.AutoConfig;
 
 [AttributeUsage(AttributeTargets.Class)]
-public class AutoConfigAttribute : Attribute
+public class AutoConfigAttribute(string name) : Attribute
 {
-    public string Name { get; }
-
-    public AutoConfigAttribute(string name)
-    {
-        Name = name;
-    }
+    public string Name { get; } = name;
 }

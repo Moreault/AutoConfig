@@ -9,6 +9,3 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
-    ignore:
-      - dependency-name: "FluentAssertions"
-        versions: ['8.*']
