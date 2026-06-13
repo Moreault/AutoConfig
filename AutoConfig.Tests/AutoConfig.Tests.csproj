@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AutoConfig\AutoConfig.csproj" />
+    <ProjectReference Include="..\AutoConfig.Generators\AutoConfig.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <ItemGroup>
