@@ -19,8 +19,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="ToolBX.AssemblyInitializer.Console" Version="3.0.0" />
-		<PackageReference Include="ToolBX.MisterTerminal" Version="3.0.0" />
+		<PackageReference Include="ToolBX.AssemblyInitializer.Console" Version="4.0.0" />
+		<PackageReference Include="ToolBX.MisterTerminal" Version="4.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
