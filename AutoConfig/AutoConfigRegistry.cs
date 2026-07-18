@@ -11,6 +11,8 @@ public static class AutoConfigRegistry
 {
     private static readonly List<Registration> Registrations = new();
 
+    private static readonly object Lock = new();
+
     /// <summary>
     /// Called by generated code to register an assembly's <c>[AutoConfig]</c> bindings. Not intended to be
     /// called directly.
@@ -20,20 +22,26 @@ public static class AutoConfigRegistry
         ArgumentNullException.ThrowIfNull(assembly);
         ArgumentNullException.ThrowIfNull(register);
         ArgumentNullException.ThrowIfNull(collectOptions);
-        Registrations.Add(new Registration(assembly, register, collectOptions));
+        lock (Lock)
+            Registrations.Add(new Registration(assembly, register, collectOptions));
     }
 
-    internal static IEnumerable<Registration> For(Assembly assembly)
+    internal static IReadOnlyList<Registration> For(Assembly assembly)
     {
-        foreach (var registration in Registrations)
-            if (Equals(registration.Assembly, assembly))
-                yield return registration;
+        lock (Lock)
+        {
+            var result = new List<Registration>();
+            foreach (var registration in Registrations)
+                if (Equals(registration.Assembly, assembly))
+                    result.Add(registration);
+            return result;
+        }
     }
 
-    internal static IEnumerable<Registration> All()
+    internal static IReadOnlyList<Registration> All()
     {
-        foreach (var registration in Registrations)
-            yield return registration;
+        lock (Lock)
+            return Registrations.ToList();
     }
 
     internal sealed record Registration(Assembly Assembly, Action<IServiceCollection, IConfiguration, AutoConfigOptions> Register, Action<IServiceProvider, List<object>> CollectOptions);
