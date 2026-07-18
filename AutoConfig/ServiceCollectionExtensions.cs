@@ -2,8 +2,6 @@ namespace ToolBX.AutoConfig;
 
 public static class ServiceCollectionExtensions
 {
-    private const string RegistrarTypeName = "ToolBX.AutoConfig.Generated.AutoConfigRegistrar";
-
     /// <summary>
     /// Adds every class with the <see cref="AutoConfigAttribute"/> attribute (or type bound via <see cref="AutoConfigAttribute{T}"/>)
     /// from the specified assembly to the <see cref="IServiceCollection"/> as <see cref="IOptions{TOptions}"/>.
@@ -14,13 +12,16 @@ public static class ServiceCollectionExtensions
         ArgumentNullException.ThrowIfNull(assembly);
         ArgumentNullException.ThrowIfNull(configuration);
 
-        Register(assembly, services, configuration, options ?? new AutoConfigOptions());
+        options ??= new AutoConfigOptions();
+        foreach (var registration in AutoConfigRegistry.For(assembly))
+            registration.Register(services, configuration, options);
+
         return services;
     }
 
     /// <summary>
     /// Adds every class with the <see cref="AutoConfigAttribute"/> attribute (or type bound via <see cref="AutoConfigAttribute{T}"/>)
-    /// from all loaded assemblies to the <see cref="IServiceCollection"/> as <see cref="IOptions{TOptions}"/>.
+    /// from all assemblies that declare <c>[AutoConfig]</c> bindings to the <see cref="IServiceCollection"/> as <see cref="IOptions{TOptions}"/>.
     /// </summary>
     public static IServiceCollection AddAutoConfig(this IServiceCollection services, IConfiguration configuration, AutoConfigOptions? options = null)
     {
@@ -28,20 +29,10 @@ public static class ServiceCollectionExtensions
         ArgumentNullException.ThrowIfNull(configuration);
 
         options ??= new AutoConfigOptions();
-        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-        {
-            if (assembly.GetCustomAttribute<HasAutoConfigServicesAttribute>() is not null)
-                Register(assembly, services, configuration, options);
-        }
+        foreach (var registration in AutoConfigRegistry.All())
+            registration.Register(services, configuration, options);
 
         return services;
-    }
-
-    private static void Register(Assembly assembly, IServiceCollection services, IConfiguration configuration, AutoConfigOptions options)
-    {
-        var registrar = assembly.GetType(RegistrarTypeName);
-        var method = registrar?.GetMethod("Register", BindingFlags.Public | BindingFlags.Static);
-        method?.Invoke(null, [services, configuration, options]);
     }
 
     /// <summary>
@@ -53,14 +44,8 @@ public static class ServiceCollectionExtensions
         ArgumentNullException.ThrowIfNull(serviceProvider);
 
         var collected = new List<object>();
-        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-        {
-            if (assembly.GetCustomAttribute<HasAutoConfigServicesAttribute>() is null) continue;
-
-            var registrar = assembly.GetType(RegistrarTypeName);
-            var method = registrar?.GetMethod("CollectOptions", BindingFlags.Public | BindingFlags.Static);
-            method?.Invoke(null, [serviceProvider, collected]);
-        }
+        foreach (var registration in AutoConfigRegistry.All())
+            registration.CollectOptions(serviceProvider, collected);
 
         return collected.OfType<T>().Distinct().ToList();
     }

@@ -54,7 +54,7 @@ Alternatively, you can also specify which assembly to use :
 services.AddAutoConfig(Assembly.GetExecutingAssembly(), configuration);
 ```
 
-The parameterless overload walks every loaded assembly and invokes the registration code generated for each one that contains `[AutoConfig]` bindings. The `Assembly` overload skips that walk and registers a single assembly, so prefer it if you want to be explicit or shave off the assembly enumeration.
+The parameterless overload registers bindings for every assembly that declares `[AutoConfig]` bindings and is loaded into the process — each such assembly self-registers from a module initializer, so no assembly or type scanning takes place. The `Assembly` overload registers a single assembly, so prefer it (typically wrapped in a small `AddMyLibrary()` extension) when you want to be explicit or guarantee an assembly is loaded before registration.
 
 ## How it works
 
@@ -79,7 +79,7 @@ When you consume AutoConfig as a NuGet package, the source generator is included
 
 ### Native AOT and trimming
 
-The `ToolBX.AutoConfig` assembly is marked `IsAotCompatible` and contains no AOT-hostile reflection. The actual reading of values out of `IConfiguration` is still performed by the standard `Microsoft.Extensions.Configuration` binder, which uses reflection; the generated registration method is therefore annotated with `[RequiresUnreferencedCode]` / `[RequiresDynamicCode]`. Because AutoConfig invokes that method across a reflection boundary, this requirement stays contained and does not bubble up to your `AddAutoConfig` call sites — but, as with any reflection-based configuration binding, keep your options types simple (or preserve them via trimming roots) when publishing trimmed or Native AOT.
+The `ToolBX.AutoConfig` assembly contains no AOT-hostile reflection: assembly/type discovery is done entirely through source-generated module initializers that self-register into `AutoConfigRegistry` (no `Assembly.GetType` / `MethodInfo.Invoke`). The actual reading of values out of `IConfiguration` is still performed by the standard `Microsoft.Extensions.Configuration` binder, which uses reflection; the generated registration method is therefore annotated with `[RequiresUnreferencedCode]` / `[RequiresDynamicCode]`, and the generated code (not yours) creates the delegate that AutoConfig invokes. This keeps the requirement contained so it does not bubble up to your `AddAutoConfig` call sites — but, as with any reflection-based configuration binding, keep your options types simple (or preserve them via trimming roots) when publishing trimmed or Native AOT.
 
 ## Binding types you don't own
 

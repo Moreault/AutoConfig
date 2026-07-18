@@ -147,6 +147,12 @@ public class AutoConfigSourceGenerator : IIncrementalGenerator
         builder.AppendLine("{");
         builder.AppendLine("    internal static class AutoConfigRegistrar");
         builder.AppendLine("    {");
+        builder.AppendLine("        [global::System.Runtime.CompilerServices.ModuleInitializer]");
+        builder.AppendLine("        internal static void Initialize()");
+        builder.AppendLine("        {");
+        builder.AppendLine("            global::ToolBX.AutoConfig.AutoConfigRegistry.Register(typeof(AutoConfigRegistrar).Assembly, Register, CollectOptions);");
+        builder.AppendLine("        }");
+        builder.AppendLine();
         builder.AppendLine("        [global::System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode(\"AutoConfig binds configuration sections through reflection-based configuration binding.\")]");
         builder.AppendLine("        [global::System.Diagnostics.CodeAnalysis.RequiresDynamicCode(\"AutoConfig binds configuration sections through reflection-based configuration binding.\")]");
         builder.AppendLine("        public static void Register(");
