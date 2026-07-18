@@ -1,58 +1,52 @@
-﻿namespace ToolBX.AutoConfig;
+namespace ToolBX.AutoConfig;
 
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Adds all classes with the <see cref="AutoConfigAttribute"/> attribute from the specified assembly to the <see cref="IServiceCollection"/> as <see cref="IOptions{TOptions}"/>.
+    /// Adds every class with the <see cref="AutoConfigAttribute"/> attribute (or type bound via <see cref="AutoConfigAttribute{T}"/>)
+    /// from the specified assembly to the <see cref="IServiceCollection"/> as <see cref="IOptions{TOptions}"/>.
     /// </summary>
-    public static IServiceCollection AddAutoConfig(this IServiceCollection services, Assembly assembly, IConfiguration configuration)
+    public static IServiceCollection AddAutoConfig(this IServiceCollection services, Assembly assembly, IConfiguration configuration, AutoConfigOptions? options = null)
     {
-        if (services is null) throw new ArgumentNullException(nameof(services));
-        if (assembly is null) throw new ArgumentNullException(nameof(assembly));
-        if (configuration is null) throw new ArgumentNullException(nameof(configuration));
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(assembly);
+        ArgumentNullException.ThrowIfNull(configuration);
 
-        var types = Types.From(assembly).Where(x => !x.IsInterface && !x.IsAbstract && !x.IsGenericTypeDefinition && !x.IsGenericType && x.HasAttribute<AutoConfigAttribute>());
-        return services.AddAutoConfig(configuration, types);
-    }
-
-    /// <summary>
-    /// Adds all classes with the <see cref="AutoConfigAttribute"/> attribute from all assemblies to the <see cref="IServiceCollection"/> as <see cref="IOptions{TOptions}"/>.
-    /// </summary>
-    public static IServiceCollection AddAutoConfig(this IServiceCollection services, IConfiguration configuration)
-    {
-        if (services is null) throw new ArgumentNullException(nameof(services));
-        if (configuration is null) throw new ArgumentNullException(nameof(configuration));
-
-        var types = Types.Where(x => !x.IsInterface && !x.IsAbstract && !x.IsGenericTypeDefinition && !x.IsGenericType && x.HasAttribute<AutoConfigAttribute>());
-        return services.AddAutoConfig(configuration, types);
-    }
-
-    private static IServiceCollection AddAutoConfig(this IServiceCollection services, IConfiguration configuration, IEnumerable<Type> types)
-    {
-        foreach (var type in types)
-        {
-            var attribute = (AutoConfigAttribute)Attribute.GetCustomAttribute(type, typeof(AutoConfigAttribute), true)!;
-            typeof(ServiceCollectionExtensions).GetMethod(nameof(Configure), BindingFlags.Static | BindingFlags.NonPublic)!.MakeGenericMethod(type)
-                .Invoke(null, BindingFlags.Static | BindingFlags.NonPublic, null, new object[] { services, configuration, attribute.Name }, null);
-        }
+        options ??= new AutoConfigOptions();
+        foreach (var registration in AutoConfigRegistry.For(assembly))
+            registration.Register(services, configuration, options);
 
         return services;
     }
 
-    private static IServiceCollection Configure<T>(IServiceCollection services, IConfiguration configuration, string name) where T : class
+    /// <summary>
+    /// Adds every class with the <see cref="AutoConfigAttribute"/> attribute (or type bound via <see cref="AutoConfigAttribute{T}"/>)
+    /// from all assemblies that declare <c>[AutoConfig]</c> bindings to the <see cref="IServiceCollection"/> as <see cref="IOptions{TOptions}"/>.
+    /// </summary>
+    public static IServiceCollection AddAutoConfig(this IServiceCollection services, IConfiguration configuration, AutoConfigOptions? options = null)
     {
-        var section = GetSection(configuration, name);
-        return services.Configure<T>(x => section.Bind(x));
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(configuration);
+
+        options ??= new AutoConfigOptions();
+        foreach (var registration in AutoConfigRegistry.All())
+            registration.Register(services, configuration, options);
+
+        return services;
     }
 
-    private static IConfigurationSection GetSection(IConfiguration configuration, string path)
+    /// <summary>
+    /// Returns the resolved <see cref="IOptions{T}.Value"/> for every type bound via <see cref="AutoConfigAttribute"/> (or
+    /// <see cref="AutoConfigAttribute{T}"/>) that is assignable to <typeparamref name="T"/>.
+    /// </summary>
+    public static IReadOnlyList<T> GetAutoConfigOptions<T>(this IServiceProvider serviceProvider) where T : class
     {
-        string[] parts = path.Split('.');
-        IConfigurationSection section = configuration.GetSection(parts[0]);
-        for (int i = 1; i < parts.Length; i++)
-        {
-            section = section.GetSection(parts[i]);
-        }
-        return section;
+        ArgumentNullException.ThrowIfNull(serviceProvider);
+
+        var collected = new List<object>();
+        foreach (var registration in AutoConfigRegistry.All())
+            registration.CollectOptions(serviceProvider, collected);
+
+        return collected.OfType<T>().Distinct().ToList();
     }
 }

@@ -1,7 +1,7 @@
-﻿namespace AutoConfig.Sample;
+namespace AutoConfig.Sample;
 
-[AutoConfig("Group.SampleB")]
+[AutoConfig("Group:SampleB")]
 public sealed record SampleBOptions
 {
-    public string Text { get; init; }
+    public string Text { get; init; } = string.Empty;
 }

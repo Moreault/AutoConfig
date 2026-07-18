@@ -1,4 +1,4 @@
-﻿namespace AutoConfig.Sample;
+namespace AutoConfig.Sample;
 
 public interface ISample
 {
@@ -6,20 +6,12 @@ public interface ISample
 }
 
 [AutoInject]
-public class Sample : ISample
+public class Sample(ITerminal terminal, IOptions<SampleOptions> options, IOptions<SampleAOptions> optionsA, IOptions<SampleBOptions> optionsB) : ISample
 {
-    private readonly ITerminal _terminal;
-    private readonly SampleOptions _options;
-    private readonly SampleAOptions _optionsA;
-    private readonly SampleBOptions _optionsB;
-
-    public Sample(ITerminal terminal, IOptions<SampleOptions> options, IOptions<SampleAOptions> optionsA, IOptions<SampleBOptions> optionsB)
-    {
-        _terminal = terminal;
-        _options = options.Value;
-        _optionsA = optionsA.Value;
-        _optionsB = optionsB.Value;
-    }
+    private readonly ITerminal _terminal = terminal;
+    private readonly SampleOptions _options = options.Value;
+    private readonly SampleAOptions _optionsA = optionsA.Value;
+    private readonly SampleBOptions _optionsB = optionsB.Value;
 
     public void Start()
     {
